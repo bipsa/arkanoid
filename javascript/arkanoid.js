@@ -5,7 +5,7 @@
 * @created April 14th 2012
 * @how var game = new Arkanoid();
 **/
-var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
+var Arkanoid = function(board, params){
 
 
 	/**
@@ -22,7 +22,7 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 		gameState = "playing",
 		direction = "bottom",
 		forceX = 0,
-		forceY = 5;
+		forceY = params.force;
 
 
 	/**
@@ -33,13 +33,23 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 		NUMBER_OF_ROWS = 2;
 
 
+
+	/**
+	* @public
+	* se setea la fuerza de la bola
+	**/
+	var setForce = function(value){
+		params.force = value;
+	};
+
+
 	/**
 	* @public
 	* reinicia la bola en su punto original
 	**/
 	var start = function(){
 		forceX = 0,
-		forceY = 5;
+		forceY = params.force;
 		gameState = "playing";
 		ball.setX((canvas.width/2)-ballRadius);
 		ball.setY(((canvas.height/2)-ballRadius) + 20);
@@ -60,7 +70,7 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 		gameState = "playing";
 		direction = "bottom";
 		forceX = 0;
-		forceY = 5;
+		forceY = params.force;
 		board = level;
 		createBlocks();
 		createPaddle();
@@ -74,8 +84,8 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 	**/
 	var onBallDropped = function(){
 		gameState = "stopped";
-		if(onFail)
-			onFail();
+		if(params.onFail)
+			params.onFail();
 	}
 
 
@@ -85,8 +95,8 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 	**/
 	var callVictory = function(){
 		gameState = "victory";
-		if(onVictory)
-			onVictory();
+		if(params.onVictory)
+			params.onVictory();
 	};
 
 
@@ -99,7 +109,7 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 			blocksCount = 0;
 		if(gameState === "victory" || blocks.length == 0)
 			return;
-		forceY = (direction === "bottom")?5:-5;
+		forceY = (direction === "bottom")?params.force:params.force*-1;
 		for (; i<blocks.length; i++){
 			if(blocks[i].getForce()>0){
 				blocks[i].draw();
@@ -118,8 +128,8 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 						direction = "bottom";
 						blocks[i].hitted();
 						if(blocks[i].getForce()<=0)
-							if(onBlockDestroyed)
-								onBlockDestroyed();
+							if(params.onBlockDestroyed)
+								params.onBlockDestroyed();
 					}
 			}
 			if(ball.getY() < 0)
@@ -182,7 +192,7 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 							Math.round(i*(canvas.height/GRID_ROWS)) + padding,
 							Math.round(canvas.width/GRID_COLUMNS) - padding, 
 							Math.round(canvas.height/GRID_ROWS) - padding,
-							type, onBlockDestroyed);
+							type, params.onBlockDestroyed);
 			block.setName = "block_" + i + "_" + u;
 			blocks.push(block);
 		};
@@ -204,7 +214,7 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 								Math.round(i*(canvas.height/GRID_ROWS)) + padding,
 								Math.round(canvas.width/GRID_COLUMNS) - padding, 
 								Math.round(canvas.height/GRID_ROWS) - padding,
-								BlocksTypes.WEAK_BLOCK, onBlockDestroyed);
+								BlocksTypes.WEAK_BLOCK, params.onBlockDestroyed);
 					block.setName = "block_" + i + "_" + u;
 					blocks.push(block);
 				}
@@ -254,7 +264,8 @@ var Arkanoid = function(board, onVictory, onFail, onBlockDestroyed){
 	return{
 		"start" : start,
 		"clear" : clear,
-		"loadLevel" : loadLevel
+		"loadLevel" : loadLevel,
+		"setForce" : setForce
 	};
 };
 
@@ -562,22 +573,28 @@ var GetJSON = function(uri, onComplete){
 *
 */
 window.addEventListener("load", function(){
+	var game;
 	GetJSON("levels/level0.json", function(json){
-		var game = new Arkanoid(json.level.board, function(){
-			game.clear();
-			GetJSON("levels/level1.json", function(json){
-				game.loadLevel(json.level.board);
-			});
-		}, function(){
-			var change = parseInt(document.querySelector("#changes").innerHTML) - 1;
-			if(change > -1){
-				document.querySelector("#changes").innerHTML = change;
-				game.start();
-			}
+		game = new Arkanoid(json.level.board, {
+			"force" : 1,
+			"onVictory":function(){
+				game.clear();
+				GetJSON("levels/level1.json", function(json){
+					game.loadLevel(json.level.board);
+				});
+			}, 
+			"onFail":function(){
+				var change = parseInt(document.querySelector("#changes").innerHTML) - 1;
+				if(change > -1){
+					document.querySelector("#changes").innerHTML = change;
+					game.start();
+				}
 
-		}, function(type){
-			var score = parseInt(document.querySelector("#score").innerHTML) + 20;
-			document.querySelector("#score").innerHTML = score;
+			}, 
+			"onBlockDestroyed":function(type){
+				var score = parseInt(document.querySelector("#score").innerHTML) + 20;
+				document.querySelector("#score").innerHTML = score;
+			}
 		});
 	});
 });
