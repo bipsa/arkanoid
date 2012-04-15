@@ -1,0 +1,59 @@
+body{
+	background:black;
+	margin: 0;
+	font-family:Arial, Helvetica, sans-serif;
+	color:#FFF;
+}
+
+.canvas-holder {
+	display: block;
+	border: 10px #333 solid;
+	width:260px;
+	border-radius:3px;
+}
+
+h1{
+	font-weight:normal;
+	margin:0;
+	padding: 0;
+}
+
+a, a:hover{
+	color:white;
+}
+
+.wrapper {
+	font-size:.8em;
+	width:260px;
+	margin:20px auto;
+}
+
+	.wrapper .message{
+		width:228px;
+	}
+
+	.wrapper span{
+		font-size:.8em;
+		color:#666666;
+		margin:0 0 0 8px;
+	}
+.score-holder{
+	position: absolute;
+	width:260px;
+	background:rgba(99, 99, 99, .4);
+	height:20px;
+	line-height:20px;
+}
+
+	.score-holder ul{
+		font-size:.8em;
+		color:#CCC;
+		margin: 2px 0 0;
+		padding: 0;
+	}
+
+	.score-holder li{
+		list-style:none;
+		float: left;
+		margin:0 5px;
+	}
