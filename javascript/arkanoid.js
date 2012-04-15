@@ -576,7 +576,7 @@ window.addEventListener("load", function(){
 	var game;
 	GetJSON("levels/level0.json", function(json){
 		game = new Arkanoid(json.level.board, {
-			"force" : 1,
+			"force" : 2,
 			"onVictory":function(){
 				game.clear();
 				GetJSON("levels/level1.json", function(json){
